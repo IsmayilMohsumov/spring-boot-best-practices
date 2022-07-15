@@ -1,11 +1,13 @@
 package com.adios.springbootpractice.student;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import javax.swing.text.html.Option;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.Arrays;
@@ -53,6 +55,37 @@ class StudentServiceTest {
         List<Student> allStudents = underTest.getAllStudents();
 
         assertThat(allStudents).isNotEmpty();
+    }
+
+    @Test
+    void itShouldFindStudentById() {
+        //Given
+        Student studentIsmayil = new Student(
+                "Ismayil",
+                "fake",
+                LocalDate.of(2001, Month.MARCH, 4));
+        //When
+
+//        doReturn(Optional.of(studentIsmayil)).when(studentRepository).findById(1L);
+        when(studentRepository.findById(1L)).thenReturn(Optional.of(mock(Student.class)));
+
+        //Then
+        assertThat(underTest.findStudentById(1L)).isNotNull();
+    }
+
+
+    @Test
+    @DisplayName("When there is no student with given id then it should throw an exception")
+    void itShouldThrowExceptionWhenThereIsNotStudentWithId() {
+        //Given
+        //When
+        when(studentRepository.findById(1L))
+                .thenReturn(Optional.empty());
+
+        //Then
+        assertThatThrownBy( () -> underTest.findStudentById(1L))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Student not found");
     }
 
     @Test
@@ -108,5 +141,27 @@ class StudentServiceTest {
 
         //Finally
         then(studentRepository).should(never()).save(any(Student.class));
+    }
+
+    @Test
+    void itShouldThrowExceptionWhenThereIsNoStudentWithId() {
+        //Given
+        //When
+        when(studentRepository.findById(1L))
+                .thenReturn(Optional.empty());
+
+        //Then
+        assertThatThrownBy( () -> underTest.deleteStudentById(1L))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("There is no student with this id");
+    }
+
+    @Test
+    void itShouldDeleteStudentById() {
+        //Given
+        //When
+        when(studentRepository.findById(1L)).thenReturn(Optional.of(mock(Student.class)));
+
+        //Then
     }
 }
